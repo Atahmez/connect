@@ -6,21 +6,42 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.connectu.viewmodel.UserViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (username: String, password: String) -> Unit,
-    onRegisterClick: () -> Unit,
-    loginError: String? = null
+    navController: NavController,
+    userViewModel: UserViewModel
 ) {
+    val context = LocalContext.current
+
+    // 🔴 REQUIRED: initialize Room + repository
+    LaunchedEffect(Unit) {
+        userViewModel.initialize(context)
+    }
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val loginResult by userViewModel.loginResult.collectAsState()
+
+    // 🔁 React to login result
+    LaunchedEffect(loginResult) {
+        if (loginResult == "success") {
+            userViewModel.clearLoginState()
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -65,10 +86,10 @@ fun LoginScreen(
             }
         )
 
-        if (loginError != null) {
+        if (loginResult != null && loginResult != "success") {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = loginError,
+                text = loginResult ?: "",
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 14.sp
             )
@@ -77,7 +98,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { onLoginClick(username, password) },
+            onClick = {
+                userViewModel.login(username, password)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
@@ -88,7 +111,10 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = onRegisterClick) {
+        TextButton(onClick = {
+            userViewModel.clearLoginState()
+            navController.navigate("register")
+        }) {
             Text("Don’t have an account? Create one")
         }
     }
