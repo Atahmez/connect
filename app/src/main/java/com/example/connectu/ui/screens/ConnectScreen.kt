@@ -1,13 +1,17 @@
 package com.example.connectu.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.connectu.ui.components.FriendCard
 
 @Composable
 fun ConnectScreen() {
@@ -26,26 +30,9 @@ fun ConnectScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Suggested friends based on shared interests and campus life.",
+            text = "Use this screen to explore connections and navigate the app.",
             style = MaterialTheme.typography.bodyMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 🔵 ROUNDED FRIEND CARDS (TODO COMPLETE)
-        FriendCard(
-            name = "Alex Johnson",
-            interests = "Computer Science • Gym • Gaming"
-        )
-
-        FriendCard(
-            name = "Maria Lopez",
-            interests = "Biology • Volunteering • Hiking"
-        )
-
-        FriendCard(
-            name = "Chris Patel",
-            interests = "Business • Startups • Networking"
         )
     }
 }
+
