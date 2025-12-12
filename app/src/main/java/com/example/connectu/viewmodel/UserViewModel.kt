@@ -1,7 +1,7 @@
 package com.example.connectu.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.connectu.data.UserDatabase
 import com.example.connectu.data.UserRepository
@@ -9,32 +9,42 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel : ViewModel() {
 
-    private val dao = UserDatabase.getDatabase(application).userDao()
-    private val repo = UserRepository(dao)
+    private lateinit var repo: UserRepository
 
+    // ---------------------------
+    // STATE
+    // ---------------------------
     private val _loginResult = MutableStateFlow<String?>(null)
     val loginResult: StateFlow<String?> = _loginResult
 
     private val _registerResult = MutableStateFlow<String?>(null)
     val registerResult: StateFlow<String?> = _registerResult
 
-    private val _currentUserDisplayName = MutableStateFlow("")
-    val currentUserDisplayName: StateFlow<String> = _currentUserDisplayName
-
     private val _currentUserUsername = MutableStateFlow("")
     val currentUserUsername: StateFlow<String> = _currentUserUsername
+
+    // ---------------------------
+    // INITIALIZE DATABASE
+    // ---------------------------
+    fun initialize(context: Context) {
+        if (!::repo.isInitialized) {
+            val dao = UserDatabase.getDatabase(context).userDao()
+            repo = UserRepository(dao)
+        }
+    }
 
     // ---------------------------
     // LOGIN
     // ---------------------------
     fun login(username: String, password: String) {
-        viewModelScope.launch {
-            val user = repo.loginUser(username, password)
+        if (!::repo.isInitialized) return
 
-            if (user != null) {
-                _currentUserDisplayName.value = user.displayName
+        viewModelScope.launch {
+            val user = repo.getUserByUsername(username)
+
+            if (user != null && user.password == password) {
                 _currentUserUsername.value = user.username
                 _loginResult.value = "success"
             } else {
@@ -46,10 +56,12 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     // ---------------------------
     // REGISTER
     // ---------------------------
-    fun register(username: String, password: String, displayName: String) {
+    fun register(username: String, password: String) {
+        if (!::repo.isInitialized) return
+
         viewModelScope.launch {
             try {
-                repo.registerUser(username, password, displayName)
+                repo.register(username, password)
                 _registerResult.value = "success"
             } catch (e: Exception) {
                 _registerResult.value = "Error creating account"
