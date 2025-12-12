@@ -67,7 +67,7 @@ Rounded cards and Material 3 styling for a modern look
 
 Language: Kotlin
 
-UI Framework: Jetpack Compose (Material 3)
+UI Framework: Jetpack Compose 
 
 IDE: Android Studio
 
