@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.connectu.ui.components.FriendCard
 
 @Composable
 fun ConnectScreen() {
@@ -25,10 +26,26 @@ fun ConnectScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "This screen will show potential friends nearby, based on shared interests and campus life.",
+            text = "Suggested friends based on shared interests and campus life.",
             style = MaterialTheme.typography.bodyMedium
         )
 
-        // TODO: Add friend matching UI here later
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 🔵 ROUNDED FRIEND CARDS (TODO COMPLETE)
+        FriendCard(
+            name = "Alex Johnson",
+            interests = "Computer Science • Gym • Gaming"
+        )
+
+        FriendCard(
+            name = "Maria Lopez",
+            interests = "Biology • Volunteering • Hiking"
+        )
+
+        FriendCard(
+            name = "Chris Patel",
+            interests = "Business • Startups • Networking"
+        )
     }
 }
