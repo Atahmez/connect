@@ -1,6 +1,5 @@
 package com.example.connectu.nav
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -9,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.example.connectu.ui.screens.*
 import com.example.connectu.viewmodel.UserViewModel
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavGraph(navController: NavHostController) {
 
@@ -21,71 +19,44 @@ fun NavGraph(navController: NavHostController) {
     ) {
 
         // -----------------------
-        // LOGIN SCREEN
+        // LOGIN
         // -----------------------
         composable("login") {
             LoginScreen(
-                onLoginClick = { username, password ->
-                    userViewModel.login(username, password)
-                },
-                onRegisterClick = {
-                    userViewModel.clearRegisterState()
-                    navController.navigate("register")
-                },
-                loginError = userViewModel.loginResult.value
+                navController = navController,
+                userViewModel = userViewModel
             )
-
-            if (userViewModel.loginResult.value == "success") {
-                userViewModel.clearLoginState()
-                navController.navigate("home") {
-                    popUpTo("login") { inclusive = true }
-                }
-            }
         }
 
         // -----------------------
-        // REGISTER SCREEN
+        // REGISTER
         // -----------------------
         composable("register") {
             RegisterScreen(
-                onRegisterClick = { username, password, displayName ->
-                    userViewModel.register(username, password, displayName)
-                },
-                onBackToLogin = {
-                    navController.popBackStack()
-                },
-                registerError = if (userViewModel.registerResult.value != "success")
-                    userViewModel.registerResult.value else null,
-                registerSuccess = userViewModel.registerResult.value == "success"
+                navController = navController,
+                userViewModel = userViewModel
             )
         }
 
         // -----------------------
-        // HOME SCREEN
+        // HOME
         // -----------------------
         composable("home") {
-            HomeScreen(
-                displayName = userViewModel.currentUserDisplayName.value,
-                onGoToConnect = { navController.navigate("connect") },
-                onGoToProfile = { navController.navigate("profile") }
-            )
+            HomeScreen()
         }
 
         // -----------------------
-        // CONNECT SCREEN
+        // CONNECT
         // -----------------------
         composable("connect") {
             ConnectScreen()
         }
 
         // -----------------------
-        // PROFILE SCREEN
+        // PROFILE
         // -----------------------
         composable("profile") {
-            ProfileScreen(
-                username = userViewModel.currentUserUsername.value,
-                displayName = userViewModel.currentUserDisplayName.value
-            )
+            ProfileScreen()
         }
     }
 }
