@@ -6,21 +6,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.connectu.viewmodel.UserViewModel
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (username: String, password: String, displayName: String) -> Unit,
-    onBackToLogin: () -> Unit,
-    registerError: String? = null,
-    registerSuccess: Boolean = false
+    navController: NavController,
+    userViewModel: UserViewModel
 ) {
+    val context = LocalContext.current
+
+    // 🔴 REQUIRED: initialize Room + repository
+    LaunchedEffect(Unit) {
+        userViewModel.initialize(context)
+    }
+
     var username by remember { mutableStateOf("") }
-    var displayName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    val registerResult by userViewModel.registerResult.collectAsState()
+
+    // 🔁 React to register result
+    LaunchedEffect(registerResult) {
+        if (registerResult == "success") {
+            userViewModel.clearRegisterState()
+            navController.popBackStack() // go back to login
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -49,16 +66,6 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
-            value = displayName,
-            onValueChange = { displayName = it },
-            label = { Text("Display Name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
@@ -78,20 +85,11 @@ fun RegisterScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        if (registerError != null) {
+        if (registerResult != null && registerResult != "success") {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = registerError,
+                text = registerResult ?: "",
                 color = MaterialTheme.colorScheme.error,
-                fontSize = 14.sp
-            )
-        }
-
-        if (registerSuccess) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Account created! You can log in now.",
-                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp
             )
         }
@@ -101,13 +99,11 @@ fun RegisterScreen(
         Button(
             onClick = {
                 if (username.isNotBlank() &&
-                    displayName.isNotBlank() &&
                     password.isNotBlank() &&
                     password == confirmPassword
                 ) {
-                    onRegisterClick(username, password, displayName)
+                    userViewModel.register(username, password)
                 }
-                // validation errors are handled by caller via registerError
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,7 +115,10 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = onBackToLogin) {
+        TextButton(onClick = {
+            userViewModel.clearRegisterState()
+            navController.popBackStack()
+        }) {
             Text("Back to Login")
         }
     }
